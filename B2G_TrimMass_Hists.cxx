@@ -15,13 +15,15 @@ float inv_mass_B2G(const LorentzVector& p4){ return p4.isTimelike() ? p4.mass() 
 
 B2G_TrimMass_Hists::B2G_TrimMass_Hists(Context & ctx, const string & dirname): Hists(ctx, dirname){
 
-  // book all histograms here
+  // booking all histograms
   book<TH1F>("oneBin", "oneBin", 1, 0, 1);
 
+  // basic variables
   book<TH1F>("mjj", "mjj", 50, 500, 2500);
   book<TH1F>("mj", "mj", 50, 0, 500);
   book<TH1F>("HT", "HT", 50, 0, 4000);
 
+  // now with various additional requirements
   book<TH1F>("HT_abovemj_55", "HT_abovemj_55", 50, 0, 4000);
   book<TH1F>("mjj_abovemj_55", "mjj_abovemj_55", 50, 0, 3000);
 
@@ -41,10 +43,7 @@ B2G_TrimMass_Hists::B2G_TrimMass_Hists(Context & ctx, const string & dirname): H
 
 
 void B2G_TrimMass_Hists::fill(const Event & event){
-  // fill the histograms. Please note the comments in the header file:
-  // 'hist' is used here a lot for simplicity, but it will be rather
-  // slow when you have many histograms; therefore, better
-  // use histogram pointers as members as in 'UHH2/common/include/ElectronHists.h'
+  // fill the histograms
 
   // Don't forget to always use the weight when filling.
   double weight = event.weight;

@@ -1,16 +1,17 @@
-
-
+// this makro takes the "before" hist (from before_path) and the "after Trigger" hists (afterPaths) and calculates efficiencies by deviding.
+// Everything else is just input reading and a lot of styling options
 
 void B2G_TrimMass_Efficiency(){
 
   gROOT->SetBatch(kTRUE); // to not open canvas and get XQuartz in the way
 
+  // defining histogram to read
   TString histname = "mjj_abovemj_both55";
 
+  // input paths, filenames...
   TString path = "/nfs/dust/cms/user/flabe/B2G_Trigger_contact/data/";
   TString fileprefix = "uhh2.AnalysisModuleRunner.DATA.";
   TString filename = "SingleMuon2018_RunD_TrimMassTriggerTest_2018";
-
   TString before_path = "TrimMass_before";
   std::vector<TString> afterPaths = {"TrimMass_afterHT", "TrimMass_afterPFJet500", "TrimMass_TrimMass30", "TrimMass_TrimMass50", "TrimMass_afterAll"};
   std::vector<TString> titles = {"PFHT_1050", "PFJet500", "AK8PFJet400_TrimMass30", "AK8PFHT800_TrimMass50", "Total"};
@@ -22,7 +23,7 @@ void B2G_TrimMass_Efficiency(){
   if(histname.BeginsWith("mjj")) xAxisLabel = "m_{jj} [GeV]";
   else if(histname.BeginsWith("mj")) xAxisLabel = "m_{j} [GeV]";
 
-
+  // open file
   TFile *file = TFile::Open(path+fileprefix+filename+".root");
 
   // doing the quick alpha check
@@ -45,7 +46,7 @@ void B2G_TrimMass_Efficiency(){
   // read before hist histograms
   TH1D *hist_before = (TH1D*)file->Get(before_path+"/"+histname);
 
-  // plotting params
+  // plotting parameters
   Double_t w = 600;
   Double_t h = 400;
   TCanvas *canvas = new TCanvas("chist", "c", w, h);
@@ -58,12 +59,14 @@ void B2G_TrimMass_Efficiency(){
   leg->SetTextFont(42);
   leg->SetTextSize(0.035);
 
-  std::vector<TGraphAsymmErrors> effs = {TGraphAsymmErrors(), TGraphAsymmErrors(), TGraphAsymmErrors(), TGraphAsymmErrors(), TGraphAsymmErrors()};
   // calculate and plot efficiency hists
+  std::vector<TGraphAsymmErrors> effs = {TGraphAsymmErrors(), TGraphAsymmErrors(), TGraphAsymmErrors(), TGraphAsymmErrors(), TGraphAsymmErrors()};
   int i = 0;
   for (const auto & subpath : afterPaths) {
     std::cout << "Processing " << subpath << "." << std::endl;
     TH1D *hist = (TH1D*)file->Get(subpath+"/"+histname);
+
+    // this line is the actual efficiency calculation!
     effs.at(i).Divide(hist, hist_before, "cl=0.68 b(1,1) mode");
 
     effs.at(i).GetXaxis()->SetTitle(xAxisLabel);
@@ -143,11 +146,13 @@ void B2G_TrimMass_Efficiency(){
   text3->SetY(0.99);
   text3->Draw();
 
+  // write cuts in plots additional text
+  // TODO finish this
   double position = 0.4;
   double step = 0.05;
   double posX = 0.7;
   double size = 0.035;
-  // additional text
+
   TString cuttext1 = "p_{T}^{AK8} > 200 GeV";
   TLatex *textCuts1 = new TLatex(3.5, 24, cuttext1);
   textCuts1->SetNDC();
